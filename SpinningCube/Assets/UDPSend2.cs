@@ -17,6 +17,7 @@ public class UDPSend2 : MonoBehaviour
 
     // "connection" things
     IPEndPoint remoteEndPoint;
+    IPEndPoint groupEndPoint;
     UdpClient client;
 
     private string direction = "stopped";
@@ -42,7 +43,14 @@ public class UDPSend2 : MonoBehaviour
         // Senden
         // ----------------------------
         remoteEndPoint = new IPEndPoint(IPAddress.Parse(IP), port);
+        groupEndPoint = new IPEndPoint(IPAddress.Broadcast, port);
+
         client = new UdpClient();
+
+        IPAddress multicastaddress = IPAddress.Parse("224.0.0.1");
+        client.JoinMulticastGroup(multicastaddress);
+        remoteEndPoint = new IPEndPoint(multicastaddress, port);
+        
 
         // status
         print("Sending to " + IP + " : " + port);
@@ -68,11 +76,9 @@ public class UDPSend2 : MonoBehaviour
             {
                 message = Input.acceleration.x + ",0,0";
             }
-            // Daten mit der UTF8-Kodierung in das Binärformat kodieren.
             byte[] data = Encoding.UTF8.GetBytes(message);
-            // Den message zum Remote-Client senden.
             print("Sending " + message);
-            client.Send(data, data.Length, remoteEndPoint);
+            client.Send(data, data.Length, remoteEndPoint); 
             //}
         }
         catch (Exception err)

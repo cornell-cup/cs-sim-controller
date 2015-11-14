@@ -58,7 +58,7 @@ public class UDPReceive : MonoBehaviour
         IPEndPoint localEp = new IPEndPoint(IPAddress.Any, port);
         client.Client.Bind(localEp);
 
-        IPAddress multicastaddress = IPAddress.Parse("239.0.0.222");
+        IPAddress multicastaddress = IPAddress.Parse("224.0.0.1");
         client.JoinMulticastGroup(multicastaddress);
         while (true)
         {
