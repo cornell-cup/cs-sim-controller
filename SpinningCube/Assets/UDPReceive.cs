@@ -17,30 +17,27 @@ public class UDPReceive : MonoBehaviour
     UdpClient client;
 
     // public
-    // public string IP = "127.0.0.1"; default local
-    public int port; // define > init
+    public int port;
+    public bool started = false;
 
     // infos
     public Vector3 lastReceivedUDPPacket;
 
-
-    // start from unity3d
     public void Start()
     {
-
         init();
     }
 
     // init
     private void init()
     {
-        print("UDPSend.init()");
+        print("UDPReceive.init()");
 
         // define port
         port = 8051;
 
         // status
-        print("Listening on 127.0.0.1 : " + port);
+        print("Listening on everywhere : " + port);
 
 
         receiveThread = new Thread(
@@ -53,13 +50,10 @@ public class UDPReceive : MonoBehaviour
     // receive thread
     private void ReceiveData()
     {
-        client = new UdpClient();
+        client = new UdpClient(port);
+        IPEndPoint localEp = new IPEndPoint(IPAddress.Any, 0);
+        started = true;
 
-        IPEndPoint localEp = new IPEndPoint(IPAddress.Any, port);
-        client.Client.Bind(localEp);
-
-        IPAddress multicastaddress = IPAddress.Parse("224.0.0.1");
-        client.JoinMulticastGroup(multicastaddress);
         while (true)
         {
             try
@@ -68,8 +62,9 @@ public class UDPReceive : MonoBehaviour
                 string text = Encoding.UTF8.GetString(data);
                 string[] message = text.Split(new char[] { ',' });
                 Vector3 result = new Vector3(float.Parse(message[0]), float.Parse(message[1]), float.Parse(message[2]));
+                string playerIP = message[3];
 
-                print(">> " + result);
+                print(">> " + result + ", " + playerIP);
 
                 lastReceivedUDPPacket = result;
 
@@ -91,11 +86,11 @@ public class UDPReceive : MonoBehaviour
 
     public void OnApplicationQuit()
     {
-        if (receiveThread.IsAlive)
+        if (receiveThread != null)
         {
             receiveThread.Abort();
+            client.Close();
         }
-        client.Close();
     }
 
 }
