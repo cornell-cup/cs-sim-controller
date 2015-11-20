@@ -9,14 +9,14 @@ public class ChangeScene : MonoBehaviour {
 
     public void OnMouseDown()
     {
-        print("Brah\n\n\n\n\n");
-        if (Application.loadedLevelName == "FullGyro")
-        {
-            Application.LoadLevel("GyroButtons");
-        }
-        if (Application.loadedLevelName == "GyroButtons")
-        {
-            Application.LoadLevel("FullGyro");
-        }
+        string direction = GameObject.FindGameObjectWithTag("Game").GetComponent<UDPSend2>().direction;
+        //if (Application.loadedLevelName == "FullGyro")
+        //{
+        //    Application.LoadLevel("GyroButtons");
+        //}
+        //if (Application.loadedLevelName == "GyroButtons")
+        //{
+        //    Application.LoadLevel("FullGyro");
+        //}
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine.UI;
 
 public class UDPReceive : MonoBehaviour
 {
@@ -18,10 +19,12 @@ public class UDPReceive : MonoBehaviour
 
     // public
     public int port;
-    public bool started = false;
+    private IPEndPoint localEp;
+    private bool started = false;
+    private Texture2D tex;
 
     // infos
-    public Vector3 lastReceivedUDPPacket;
+    public byte[] lastReceivedUDPPacket;
 
     public void Start()
     {
@@ -34,10 +37,15 @@ public class UDPReceive : MonoBehaviour
         print("UDPReceive.init()");
 
         // define port
-        port = 8051;
+        port = 8050;
 
         // status
         print("Listening on everywhere : " + port);
+
+        client = new UdpClient(port);
+        IPEndPoint localEp = new IPEndPoint(IPAddress.Any, 0);
+
+        tex = new Texture2D(100, 50);
 
 
         receiveThread = new Thread(
@@ -50,25 +58,13 @@ public class UDPReceive : MonoBehaviour
     // receive thread
     private void ReceiveData()
     {
-        client = new UdpClient(port);
-        IPEndPoint localEp = new IPEndPoint(IPAddress.Any, 0);
-        started = true;
-
         while (true)
         {
             try
             {
                 byte[] data = client.Receive(ref localEp);
-                string text = Encoding.UTF8.GetString(data);
-                string[] message = text.Split(new char[] { ',' });
-                Vector3 result = new Vector3(float.Parse(message[0]), float.Parse(message[1]), float.Parse(message[2]));
-                string playerIP = message[3];
-
-                print(">> " + result + ", " + playerIP);
-
-                lastReceivedUDPPacket = result;
-
-
+                started = true;
+                lastReceivedUDPPacket = data;          
             }
             catch (Exception err)
             {
@@ -77,11 +73,18 @@ public class UDPReceive : MonoBehaviour
         }
     }
 
-    // getLatestUDPPacket
-    // cleans up the rest
-    public Vector3 getLatestUDPPacket()
+    private byte[] getLast()
     {
         return lastReceivedUDPPacket;
+    }
+
+    public void Update()
+    {
+        if (started)
+        {
+            tex.LoadImage(getLast());
+            GetComponent<Image>().sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f));
+        }
     }
 
     public void OnApplicationQuit()

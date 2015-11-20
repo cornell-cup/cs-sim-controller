@@ -1,0 +1,6 @@
+# Ignore temp folders
+SpinningCube/Temp
+SpinningCube/Library
+
+# Ignore meta files
+*.meta
